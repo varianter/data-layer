@@ -70,7 +70,7 @@ export async function requestEmployees(): Promise<EmployeeItem[] | undefined> {
   });
 
   if (!request.ok) {
-    return undefined;
+    throw new Error(request.statusText);
   }
   const employeesJSON = (await request.json()) as EmployeeJSON[];
 
