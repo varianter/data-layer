@@ -5,7 +5,8 @@ import {
   ContainerClient,
 } from "@azure/storage-blob";
 import { ApiEmployee } from "./types";
-import fetch from "node-fetch";
+import createFetch from "@vercel/fetch";
+const fetch = createFetch();
 
 if (
   !process.env.AZURE_STORAGE_ACCOUNT_NAME ||

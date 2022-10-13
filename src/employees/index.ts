@@ -1,6 +1,7 @@
 import handleImage from "./handleImage";
 import { ApiEmployee, EmployeeItem } from "./types";
-import fetch from "node-fetch";
+import createFetch from "@vercel/fetch";
+const fetch = createFetch();
 
 export { deleteAll } from "./handleImage";
 
