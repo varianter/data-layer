@@ -1,0 +1,17 @@
+{
+  "name": "variant-datalayer",
+  "version": "1.0.0",
+  "description": "Variant Data Layer - including CV Partner Cached API Layer",
+  "main": "api/employees/index.ts",
+  "author": "Mikael Brevik <mb@variant.no>",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "@vercel/node": "^2.5.24",
+    "vercel": "^28.4.10"
+  },
+  "dependencies": {
+    "@azure/storage-blob": "^12.11.0",
+    "node-fetch": "^3.2.10"
+  }
+}
