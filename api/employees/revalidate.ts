@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { deleteAll, requestEmployees } from "../src/employees";
+import { deleteAll, requestEmployees } from "../../src/employees";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (

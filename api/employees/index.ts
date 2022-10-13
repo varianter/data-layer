@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { requestEmployees } from "../src/employees";
+import { requestEmployees } from "../../src/employees";
 
 export default async function handler(_: VercelRequest, res: VercelResponse) {
   const employees = await requestEmployees();
