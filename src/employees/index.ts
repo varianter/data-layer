@@ -1,6 +1,8 @@
 import handleImage from "./handleImage";
 import { ApiEmployee, EmployeeItem } from "./types";
 import createFetch from "@vercel/fetch";
+import { EmployeeEndDate } from "../bemanning";
+import isBefore from "date-fns/isBefore";
 const fetch = createFetch();
 
 export { deleteAll } from "./handleImage";
@@ -57,7 +59,9 @@ type EmployeeJSON = {
   default_cv_id: string;
 };
 
-export async function requestEmployees(): Promise<EmployeeItem[] | undefined> {
+export async function requestEmployees(
+  employeeStartDates: EmployeeEndDate
+): Promise<EmployeeItem[] | undefined> {
   if (!process.env.CV_PARTNER_API_SECRET) {
     throw new Error("Environment variable CV_PARTNER_API_SECRET is missing");
   }
@@ -75,13 +79,12 @@ export async function requestEmployees(): Promise<EmployeeItem[] | undefined> {
   }
   const employeesJSON = (await request.json()) as EmployeeJSON[];
 
+  const isStarted = (employee: EmployeeJSON) =>
+    employeeStartDates[employee.email] &&
+    isBefore(employeeStartDates[employee.email], new Date());
+
   const employeeList = employeesJSON.filter(
-    (employee) =>
-      !employee.deactivated &&
-      employee.image.url &&
-      // All employees that have started should be set
-      // as countrymanager in cv-parter, when they start.
-      employee.roles.some((role) => role === "countrymanager")
+    (employee) => !employee.deactivated && isStarted(employee)
   );
 
   return await Promise.all<EmployeeItem>(

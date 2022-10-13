@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import listStartEndTimeConsultant from "../../src/bemanning";
 import { deleteAll, requestEmployees } from "../../src/employees";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -11,7 +12,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     await deleteAll();
-    const employees = await requestEmployees();
+    const employeeStartDates = await listStartEndTimeConsultant();
+    const employees = await requestEmployees(employeeStartDates);
     res.status(200).json({ employees });
   } catch (err) {
     console.error(err);

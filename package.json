@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@azure/storage-blob": "^12.11.0",
-    "@vercel/fetch": "^6.2.0"
+    "@vercel/fetch": "^6.2.0",
+    "date-fns": "^2.29.3",
+    "serverless-postgres": "^2.0.0"
   }
 }
