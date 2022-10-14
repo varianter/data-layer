@@ -4,7 +4,6 @@ import {
   newPipeline,
   ContainerClient,
 } from "@azure/storage-blob";
-import { ApiEmployee } from "./types";
 import createFetch from "@vercel/fetch";
 const fetch = createFetch();
 
@@ -29,7 +28,7 @@ const blobServiceClient = new BlobServiceClient(
 const containerName = "employees";
 
 export default async function handleImage(
-  employee: ApiEmployee,
+  employee: { name: string; imageUrl: string },
   regenerate: boolean = false
 ) {
   // Check if images exsist already
@@ -43,7 +42,7 @@ export default async function handleImage(
   return downloadAndStore(
     userFileName,
     containerClient,
-    employee.image,
+    employee.imageUrl,
     regenerate
   );
 }
@@ -56,10 +55,10 @@ export async function deleteAll() {
 async function downloadAndStore(
   fileName: string,
   containerClient: ContainerClient,
-  image: ApiEmployee["image"],
+  imageUrl: string,
   regenerate: boolean
 ) {
-  const request = await fetch(image.fit_thumb.url);
+  const request = await fetch(imageUrl);
   const outputFileName = `${fileName}.png`;
   const blockBlobClient = containerClient.getBlockBlobClient(outputFileName);
 

@@ -1,13 +1,13 @@
-import handleImage from "./handleImage";
-import { ApiEmployee, EmployeeItem } from "./types";
 import createFetch from "@vercel/fetch";
-import { EmployeeEndDate } from "../bemanning";
 import isBefore from "date-fns/isBefore";
+import { EmployeeEndDate } from "../bemanning";
+import handleImage from "./handleImage";
+import { Employee } from "./types";
 const fetch = createFetch();
 
 export { deleteAll } from "./handleImage";
 
-type EmployeeJSON = {
+type CVPartnerEmployeeDto = {
   user_id: string;
   _id: string;
   id: string;
@@ -61,7 +61,7 @@ type EmployeeJSON = {
 
 export async function requestEmployees(
   employeeStartDates: EmployeeEndDate
-): Promise<EmployeeItem[] | undefined> {
+): Promise<Employee[] | undefined> {
   if (!process.env.CV_PARTNER_API_SECRET) {
     throw new Error("Environment variable CV_PARTNER_API_SECRET is missing");
   }
@@ -77,9 +77,9 @@ export async function requestEmployees(
   if (!request.ok) {
     throw new Error(request.statusText);
   }
-  const employeesJSON = (await request.json()) as EmployeeJSON[];
+  const employeesJSON = (await request.json()) as CVPartnerEmployeeDto[];
 
-  const isStarted = (employee: EmployeeJSON) =>
+  const isStarted = (employee: CVPartnerEmployeeDto) =>
     employeeStartDates[employee.email] &&
     isBefore(employeeStartDates[employee.email], new Date());
 
@@ -87,18 +87,19 @@ export async function requestEmployees(
     (employee) => !employee.deactivated && isStarted(employee)
   );
 
-  return await Promise.all<EmployeeItem>(
-    employeeList
-      .map(toApiEmployee)
-      // .filter((employee) => employee.office_name?.toLowerCase() === officeName)
-      .map(async (employee) => {
-        const imageUrl = await handleImage(employee);
-        return { ...massageEmployee(employee), imageUrl };
-      })
+  return await Promise.all<Employee>(
+    employeeList.map(toAnonymizedTelephones).map(toEmployeeWithImage)
   );
 }
 
-function massageEmployee(employee: ApiEmployee) {
+async function toEmployeeWithImage(
+  employee: CVPartnerEmployeeWithOptionalTelephoneDto
+): Promise<Employee> {
+  const imageUrl = await handleImage({
+    name: employee.name,
+    imageUrl: employee.image.large.url,
+  });
+
   return {
     fullName: employee.name,
     name: employee.name.split(" ")[0],
@@ -111,25 +112,27 @@ function massageEmployee(employee: ApiEmployee) {
         ?.replace(/\s/g, "")
         ?.replace(/(\d{2})(\d{2})(\d{2})(\d{2})/g, "$1 $2 $3 $4") ?? null,
     officeName: employee.office_name,
+    imageUrl,
   };
 }
 
-function toApiEmployee(employee: EmployeeJSON): ApiEmployee {
-  const { name, telephone, email, image, office_name } = employee;
-
-  if (getFilteredIds().includes(employee.user_id)) {
+type CVPartnerEmployeeWithOptionalTelephoneDto = Omit<
+  CVPartnerEmployeeDto,
+  "telephone"
+> & { telephone: string | null };
+function toAnonymizedTelephones(
+  employee: CVPartnerEmployeeDto
+): CVPartnerEmployeeWithOptionalTelephoneDto {
+  if (getFilteredUserIds().includes(employee.user_id)) {
     return {
-      name,
+      ...employee,
       telephone: null,
-      email,
-      image,
-      office_name,
     };
   }
-  return { name, telephone, email, image, office_name };
+  return employee;
 }
 
-function getFilteredIds(): string[] {
+function getFilteredUserIds(): string[] {
   try {
     return JSON.parse(process.env.FILTER_USERS ?? "[]") ?? [];
   } catch (e) {
