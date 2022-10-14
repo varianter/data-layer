@@ -1,10 +1,11 @@
 import {
   BlobServiceClient,
-  StorageSharedKeyCredential,
-  newPipeline,
   ContainerClient,
+  newPipeline,
+  StorageSharedKeyCredential,
 } from "@azure/storage-blob";
 import createFetch from "@vercel/fetch";
+import isAfter from "date-fns/isAfter";
 const fetch = createFetch();
 
 if (
@@ -27,10 +28,10 @@ const blobServiceClient = new BlobServiceClient(
 
 const containerName = "employees";
 
-export default async function handleImage(
-  employee: { name: string; imageUrl: string },
-  regenerate: boolean = false
-) {
+export default async function handleImage(employee: {
+  name: string;
+  imageUrl: string;
+}) {
   // Check if images exsist already
   const userFileName = toFileName(employee.name);
   const containerClient = blobServiceClient.getContainerClient(containerName);
@@ -39,31 +40,32 @@ export default async function handleImage(
     access: "blob",
   });
 
-  return downloadAndStore(
-    userFileName,
-    containerClient,
-    employee.imageUrl,
-    regenerate
-  );
-}
-
-export async function deleteAll() {
-  const containerClient = blobServiceClient.getContainerClient(containerName);
-  await containerClient.deleteIfExists();
+  return downloadAndStore(userFileName, containerClient, employee.imageUrl);
 }
 
 async function downloadAndStore(
   fileName: string,
   containerClient: ContainerClient,
-  imageUrl: string,
-  regenerate: boolean
+  imageUrl: string
 ) {
   const request = await fetch(imageUrl);
   const outputFileName = `${fileName}.png`;
   const blockBlobClient = containerClient.getBlockBlobClient(outputFileName);
 
-  if (!regenerate && (await blockBlobClient.exists()))
-    return blockBlobClient.url;
+  if (await blockBlobClient.exists()) {
+    const { lastModified: lastModifiedStoredImage } =
+      await blockBlobClient.getProperties();
+    const lastModifiedOriginalImage = new Date(
+      request.headers.get("Last-Modified") as string
+    );
+
+    if (
+      lastModifiedStoredImage &&
+      isAfter(lastModifiedStoredImage, lastModifiedOriginalImage)
+    ) {
+      return blockBlobClient.url;
+    }
+  }
 
   await blockBlobClient.uploadData(await request.arrayBuffer(), {
     blobHTTPHeaders: { blobContentType: "image/png" },

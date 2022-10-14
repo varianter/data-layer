@@ -5,8 +5,6 @@ import handleImage from "./handleImage";
 import { Employee } from "./types";
 const fetch = createFetch();
 
-export { deleteAll } from "./handleImage";
-
 type CVPartnerEmployeeDto = {
   user_id: string;
   _id: string;
