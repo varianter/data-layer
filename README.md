@@ -22,7 +22,10 @@ To integrate with CV Partner for fetching employees and Blob Storage to cache/st
 # Set to integrate with CV Partner
 CV_PARTNER_API_SECRET=<API_KEY>
 
-# Blob Storage settings:
+# Blob Storage settings for storing cached CV images
 AZURE_STORAGE_ACCOUNT_ACCESS_KEY=<ACCESS_KEY>
 AZURE_STORAGE_ACCOUNT_NAME=variantno
+
+# Connect to Bemanning to get start/end date for consultants
+BEMANNING_CONNECTION_STRING=<connection_string>
 ```
