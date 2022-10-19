@@ -1,4 +1,6 @@
-import {EmployeeCv, Project, Publication, Qualifications} from './types';
+import { EmployeeCv, Project, Publication, Qualifications } from './types';
+import { fetch } from '../shared/utils/fetch';
+import { ApiError } from '../shared/ApiError';
 
 type EmployeeCvJson = {
     name: string,
@@ -76,17 +78,21 @@ type EmployeeCvJson = {
     ],
 }
 
-
 export const requestCv = async (userId: string, cvId: string): Promise<EmployeeCv> => {
     const url = 'https://variant.cvpartner.com/api/v3/cvs';
     const endpoint = [url, userId, cvId].join('/');
 
-    return fetch(endpoint, {
+    const response = await fetch(endpoint, {
         method: 'GET',
         headers: {'Authorization': 'Token token=' + process.env.CV_PARTNER_API_SECRET}  // TODO Handle when key is missing
     })
-        .then(response => response.json())
-        .then(convertToCv);
+
+    if(!response.ok) {
+        throw new ApiError(response.status, response.statusText);
+    }
+
+    const cvJson: EmployeeCvJson = await response.json();
+    return convertToCv(cvJson);
 }
 
 const convertToCv = (cvJson: EmployeeCvJson): EmployeeCv => {
