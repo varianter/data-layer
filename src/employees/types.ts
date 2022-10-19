@@ -5,4 +5,6 @@ export type Employee = {
   telephone: string | null;
   imageUrl: string;
   officeName: string;
+  userId: string;
+  defaultCvId: string;
 };

@@ -111,6 +111,8 @@ async function toEmployeeWithImage(
         ?.replace(/(\d{2})(\d{2})(\d{2})(\d{2})/g, "$1 $2 $3 $4") ?? null,
     officeName: employee.office_name,
     imageUrl,
+    defaultCvId: employee.default_cv_id,
+    userId: employee.user_id,
   };
 }
 
