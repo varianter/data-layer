@@ -1,9 +1,8 @@
-import createFetch from "@vercel/fetch";
 import isBefore from "date-fns/isBefore";
 import { EmployeeEndDate } from "../bemanning";
 import handleImage from "./handleImage";
 import { Employee } from "./types";
-const fetch = createFetch();
+import { fetch } from '../shared/utils/fetch';
 
 type CVPartnerEmployeeDto = {
   user_id: string;
