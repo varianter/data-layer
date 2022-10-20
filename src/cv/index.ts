@@ -1,6 +1,7 @@
 import { EmployeeCv, Project, Publication, Qualifications } from './types';
 import { fetch } from '../shared/utils/fetch';
 import { ApiError } from '../shared/ApiError';
+import { getBaseUrl } from '../shared/utils/baseUrl';
 
 type EmployeeCvJson = {
     name: string,
@@ -76,6 +77,15 @@ type EmployeeCvJson = {
             url: string,
         },
     ],
+}
+
+/**
+ * Calls the vercel api/cv endpoint to make use of the caching policy applied there
+ */
+ export const getCachedCv = async (email: string): Promise<EmployeeCv> => {
+    const res = await fetch(`${getBaseUrl()}/api/cv?email=${email}`)
+      .then(res => res.json());
+    return res.cv;
 }
 
 export const requestCv = async (userId: string, cvId: string): Promise<EmployeeCv> => {
