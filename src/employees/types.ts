@@ -3,6 +3,6 @@ export type Employee = {
   name: string;
   email: string;
   telephone: string | null;
-  imageUrl: string;
+  imageUrl?: string;
   officeName: string;
 };
