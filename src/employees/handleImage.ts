@@ -48,30 +48,34 @@ async function downloadAndStore(
   containerClient: ContainerClient,
   imageUrl: string
 ) {
-  const request = await fetch(imageUrl);
-  const outputFileName = `${fileName}.png`;
-  const blockBlobClient = containerClient.getBlockBlobClient(outputFileName);
+  try {
+    const request = await fetch(imageUrl);
+    const outputFileName = `${fileName}.png`;
+    const blockBlobClient = containerClient.getBlockBlobClient(outputFileName);
 
-  if (await blockBlobClient.exists()) {
-    const { lastModified: lastModifiedStoredImage } =
-      await blockBlobClient.getProperties();
-    const lastModifiedOriginalImage = new Date(
-      request.headers.get("Last-Modified") as string
-    );
+    if (await blockBlobClient.exists()) {
+      const { lastModified: lastModifiedStoredImage } =
+        await blockBlobClient.getProperties();
+      const lastModifiedOriginalImage = new Date(
+        request.headers.get("Last-Modified") as string
+      );
 
-    if (
-      lastModifiedStoredImage &&
-      isAfter(lastModifiedStoredImage, lastModifiedOriginalImage)
-    ) {
-      return blockBlobClient.url;
+      if (
+        lastModifiedStoredImage &&
+        isAfter(lastModifiedStoredImage, lastModifiedOriginalImage)
+      ) {
+        return blockBlobClient.url;
+      }
     }
+
+    await blockBlobClient.uploadData(await request.arrayBuffer(), {
+      blobHTTPHeaders: { blobContentType: "image/png" },
+    });
+
+    return blockBlobClient.url;
+  } catch (e) {
+    console.log(e);
   }
-
-  await blockBlobClient.uploadData(await request.arrayBuffer(), {
-    blobHTTPHeaders: { blobContentType: "image/png" },
-  });
-
-  return blockBlobClient.url;
 }
 
 function toFileName(name: string) {
