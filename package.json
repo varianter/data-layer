@@ -1,6 +1,7 @@
 {
   "name": "variant-datalayer",
   "version": "1.0.0",
+  "type": "module",
   "description": "Variant Data Layer - including CV Partner Cached API Layer",
   "main": "api/employees/index.ts",
   "author": "Mikael Brevik <mb@variant.no>",
