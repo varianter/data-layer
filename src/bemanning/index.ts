@@ -21,7 +21,7 @@ export default async function listStartEndTimeConsultant(): Promise<EmployeeEndD
     const result = await client.query(`
   SELECT c."Email" as email, MAX(s."YearWeek") as "startWeek" FROM "Consultant" as c
   LEFT JOIN "Staffing" s ON c.id = s."ConsultantId" AND s."Hours" <> 0 AND s."EngagementId" = '${NOT_STARTED_ID}'
-  WHERE c."EndDate" IS NULL
+  WHERE c."EndDate" IS NULL OR c."EndDate" > now()
   GROUP BY c.id
 `);
     await client.clean();
@@ -31,7 +31,9 @@ export default async function listStartEndTimeConsultant(): Promise<EmployeeEndD
 
     let data: EmployeeEndDate = {};
     for (let employee of result.rows as EmployeeEndYearWeekDto[]) {
-      data[employee.email] = yearWeekToDate(employee.startWeek);
+      if (employee.email) {
+        data[employee.email] = yearWeekToDate(employee.startWeek);
+      }
     }
     return data;
   } catch (e) {
