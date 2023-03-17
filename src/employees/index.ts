@@ -63,14 +63,17 @@ export async function requestEmployees(
   if (!process.env.CV_PARTNER_API_SECRET) {
     throw new Error("Environment variable CV_PARTNER_API_SECRET is missing");
   }
-  const request = await fetch("https://variant.cvpartner.com/api/v1/users", {
-    headers: [
-      [
-        "Authorization",
-        `Token token="${process.env.CV_PARTNER_API_SECRET || ""}"`,
+  const request = await fetch(
+    "https://variant.cvpartner.com/api/v2/users/search?size=200&deactivated=false",
+    {
+      headers: [
+        [
+          "Authorization",
+          `Token token="${process.env.CV_PARTNER_API_SECRET || ""}"`,
+        ],
       ],
-    ],
-  });
+    }
+  );
 
   if (!request.ok) {
     throw new Error(request.statusText);
