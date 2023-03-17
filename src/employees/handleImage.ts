@@ -49,7 +49,6 @@ export default async function handleImage(employee: {
     return res;
   } catch (e) {
     console.error(`Could not get image for ${employee.name}`);
-    console.error(e);
   }
 }
 
