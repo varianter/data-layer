@@ -1,9 +1,9 @@
-import createFetch from "@vercel/fetch";
 import isBefore from "date-fns/isBefore";
 import { EmployeeEndDate } from "../bemanning";
+import { getBaseUrl } from "../shared/utils/baseUrl";
 import handleImage from "./handleImage";
 import { Employee } from "./types";
-const fetch = createFetch();
+import { fetch } from '../shared/utils/fetch';
 
 type CVPartnerEmployeeDto = {
   user_id: string;
@@ -56,6 +56,15 @@ type CVPartnerEmployeeDto = {
   telephone: string;
   default_cv_id: string;
 };
+
+/**
+ * Calls the vercel api/employees endpoint to make use of the caching policy applied there
+ */
+export const getCachedEmployees = async (): Promise<Employee[]> => {
+  const res = await fetch(`${getBaseUrl()}/api/employees`)
+    .then(res => res.json());
+  return res?.employees ?? [];
+}
 
 export async function requestEmployees(
   employeeStartDates: EmployeeEndDate
@@ -114,6 +123,8 @@ async function toEmployeeWithImage(
         ?.replace(/(\d{2})(\d{2})(\d{2})(\d{2})/g, "$1 $2 $3 $4") ?? null,
     officeName: employee.office_name,
     imageUrl,
+    defaultCvId: employee.default_cv_id,
+    userId: employee.user_id,
   };
 }
 
